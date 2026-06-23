@@ -1,7 +1,7 @@
 import os
 import re
 from PIL import Image
-
+import streamlit.components.v1 as components
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -184,11 +184,74 @@ def short_text(text, max_len=260):
     return text if len(text) <= max_len else text[:max_len].rstrip() + "..."
 
 
-if os.path.exists(LOGO_PATH):
-    st.image(LOGO_PATH, width=225)
+HEADER_LOGO = os.path.join("assets", "vakif_katilim.png")
 
-st.markdown("## Haber Risk Monitor")
-st.caption("Günlük haber tarama, risk sınıflandırma, lokasyon ve aday firma izleme ekranı")
+top_left, center, top_right = st.columns([5, 2, 2])
+
+with top_left:
+    st.image(HEADER_LOGO, width=500)
+
+with top_right:
+    st.image(LOGO_PATH, width=220)
+
+st.markdown("""
+<h1 style="
+text-align:center;
+font-size:72px;
+font-weight:900;
+color:white;
+margin-top:0px;
+margin-bottom:-5px;
+padding:0;
+line-height:1;">
+MERCEK
+</h1>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="
+    width:420px;
+    height:4px;
+    background:linear-gradient(
+        90deg,
+        rgba(230,0,126,0),
+        #e6007e,
+        rgba(230,0,126,0)
+    );
+    margin:0px auto 4px auto;
+">
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<p style="
+text-align:center;
+font-size:24px;
+color:white;
+margin-top:0px;
+margin-bottom:0px;
+padding:0;
+line-height:1.1;">
+Medya Erken Risk Kontrol ve İzleme Platformu
+</p>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<p style="
+text-align:center;
+font-size:20px;
+font-weight:700;
+color:#ff4da6;
+margin-top:4px;
+margin-bottom:0px;
+padding:0;
+line-height:1.1;">
+Kredi İzleme Müdürlüğü
+</p>
+""", unsafe_allow_html=True)
+
+
+st.divider()
 
 if not os.path.exists(DATA_PATH):
     st.error("data/haberler_final.csv bulunamadı.")
