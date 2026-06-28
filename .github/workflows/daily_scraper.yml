@@ -65,5 +65,6 @@ jobs:
             echo "No data changes to commit."
           else
             git commit -m "Daily update - $(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M')"
+            git pull --rebase origin main
             git push
           fi
