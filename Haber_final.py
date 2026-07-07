@@ -33,7 +33,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 # TARGET_DATE = "2026-05-14"
 # MAX_NEWS = 100
 
-DAYS_BACK = 1
+DAYS_BACK = 7
 
 # Günlük otomatik kullanım:
 TARGET_DATE = None
