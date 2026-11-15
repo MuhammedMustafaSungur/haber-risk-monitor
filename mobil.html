@@ -131,16 +131,32 @@ header.hero{text-align:center;padding:14px 0 10px}
 .btn:disabled{opacity:.45}
 .more{display:flex;justify-content:center;margin:12px 0}
 
-/* Table */
-.tablewrap{overflow:auto;border-radius:12px;border:1px solid var(--line);max-height:70vh}
-table{border-collapse:collapse;font-size:12.5px;min-width:1100px;width:100%}
-th{position:sticky;top:0;background:#1e293b;color:#e2e8f0;padding:8px;text-align:left;font-weight:600;z-index:2}
-td{background:rgba(15,23,42,.85);color:#dbeafe;border-bottom:1px solid rgba(148,163,184,.12);padding:8px;vertical-align:top}
-th:first-child,td:first-child{position:sticky;left:0;z-index:1}
-th:first-child{z-index:3}
-td:first-child{background:#0f172a}
-td.title{min-width:220px;font-weight:600;color:#f1f5f9}
-td.sumc{min-width:260px;color:#cbd5e1}
+/* Kontrol listesi (mobil tablo) */
+.tbar{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.tbar .cnt{flex:1;color:var(--muted);font-size:13px}
+.tbar select{appearance:none;-webkit-appearance:none;background:var(--card2);border:1px solid var(--line);color:var(--bright);font:inherit;font-size:13.5px;font-weight:600;border-radius:12px;height:40px;padding:0 32px 0 12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.trow{background:rgba(15,23,42,.85);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
+.trow>button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px 14px;cursor:pointer}
+.trow .tn{display:flex;gap:10px;align-items:flex-start}
+.trow .no{flex:none;font-size:12px;font-weight:700;color:#64748b;min-width:22px;padding-top:2px}
+.trow .tt{flex:1;min-width:0;font-weight:700;font-size:14px;line-height:1.35;color:var(--bright);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.trow .chev{flex:none;color:#64748b;transition:transform .2s;margin-top:2px}
+.trow.open .chev{transform:rotate(180deg)}
+.trow.open .tt{-webkit-line-clamp:unset}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 0 32px}
+.kv div{min-width:0}
+.kv .k{font-size:10.5px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.kv .v{font-size:13px;color:#dbeafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv .v.cat{display:flex;align-items:center;gap:6px}
+.kv .v .d{flex:none;width:8px;height:8px;border-radius:50%}
+.kv .v.no-v{color:#475569}
+.trow.open .kv .v{white-space:normal;overflow:visible}
+.tx{border-top:1px solid var(--line);padding:12px 14px 14px 46px}
+.tx .kv{margin:0 0 10px}
+.tx .kv .v{white-space:normal}
+.tx p{margin:0 0 12px;font-size:13.5px;color:#cbd5e1}
+.tx .row2{display:flex;gap:8px;flex-wrap:wrap}
 
 /* Data panel */
 .drop{display:block;cursor:pointer;border:2px dashed rgba(148,163,184,.35);border-radius:var(--r);padding:22px 14px;text-align:center;color:var(--muted)}
@@ -279,10 +295,22 @@ nav.tabs a.on svg{stroke:var(--accent2)}
 
   <!-- TABLE -->
   <section class="view" id="v-tablo">
-    <div class="section" style="padding:10px">
-      <h2 style="padding:4px 4px 0">Kontrol Tablosu</h2>
-      <p class="hint" style="padding:0 4px">Yana kaydırın · başlık sütunu sabit.</p>
-      <div class="tablewrap"><table id="tbl"></table></div>
+    <div class="section">
+      <h2>Kontrol Tablosu</h2>
+      <p class="hint">Bir kayda dokunarak tüm bilgileri açın.</p>
+      <div class="tbar">
+        <span class="cnt" id="tCnt"></span>
+        <label for="tSort" style="position:absolute;left:-9999px">Sıralama</label>
+        <select id="tSort">
+          <option value="new">En yeni</option>
+          <option value="old">En eski</option>
+          <option value="firm">Firması olanlar önce</option>
+          <option value="cat">Kategoriye göre</option>
+          <option value="city">İle göre</option>
+        </select>
+      </div>
+      <div id="tlist"></div>
+      <div class="more"><button class="btn ghost" id="tMore" hidden>Daha fazla göster</button></div>
     </div>
   </section>
 
@@ -551,18 +579,52 @@ function renderCards(reset){
   $("moreBtn").hidden = r.length <= shown;
   $("moreBtn").textContent = `Daha fazla göster (${fmtInt(r.length - shown)} kaldı)`;
 }
-function renderTable(){
-  const r = FILTERED;
-  const head = ["Başlık","Tarih","Kategori","Özet","İl","İlçe","Mahalle / Bölge","Firma / Maps","Faaliyet","Link"];
-  if (!r.length){ $("tbl").innerHTML = `<tr><td style="position:static">${DF.length ? "Filtrelere uyan haber yok." : "Veri yok."}</td></tr>`; return; }
-  const rows = r.slice(0, 300).map(x => `<tr>
-    <td class="title">${esc(x.title)}</td><td>${esc(x.published)}</td><td>${esc(x.category)}</td>
-    <td class="sumc">${esc(short(x.summary, 300))}</td><td>${esc(x.city_raw)}</td><td>${esc(x.district_raw)}</td>
-    <td>${esc(x.neighborhood)}</td><td>${esc(x.firm)}</td><td>${esc(x.activity)}</td>
-    <td>${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">Habere Git</a>` : ""}</td></tr>`).join("");
-  $("tbl").innerHTML = `<thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody>` +
-    (r.length > 300 ? `<tfoot><tr><td colspan="10" style="position:static;color:#94a3b8">İlk 300 kayıt gösteriliyor (${fmtInt(r.length)} kayıt). Tamamı için filtreli CSV indirin.</td></tr></tfoot>` : "");
+let tSort = "new", tN = 40, tOpen = -1;
+const CHEV = `<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+const kvc = (k, v, cls) => `<div><div class="k">${k}</div><div class="v${v ? "" : " no-v"}${cls ? " " + cls : ""}">${v || "—"}</div></div>`;
+function tSorted(){
+  const r = FILTERED.slice();
+  const byT = (a,b) => (isNaN(b._t)?-1e15:b._t) - (isNaN(a._t)?-1e15:a._t);
+  if (tSort === "old") return r.sort((a,b) => -byT(a,b));
+  if (tSort === "firm") return r.sort((a,b) => ((b.firm?1:0) - (a.firm?1:0)) || byT(a,b));
+  if (tSort === "cat") return r.sort((a,b) => (a.category||"~").localeCompare(b.category||"~","tr") || byT(a,b));
+  if (tSort === "city") return r.sort((a,b) => ((a.city[0]?0:1) - (b.city[0]?0:1)) || String(a.city[0]||"").localeCompare(String(b.city[0]||""),"tr") || byT(a,b));
+  return r.sort(byT);
 }
+function renderTable(){
+  const r = tSorted();
+  $("tCnt").textContent = DF.length ? fmtInt(r.length) + " kayıt" : "";
+  if (!r.length){ $("tlist").innerHTML = `<div class="empty">${DF.length ? "Filtrelere uyan haber yok." : "Veri yok."}</div>`; $("tMore").hidden = true; return; }
+  const cats = countBy(DF, x => x.category).map(x => x[0]);
+  $("tlist").innerHTML = r.slice(0, tN).map((x, i) => {
+    const op = tOpen === x._i;
+    const color = catColor(x.category, cats.indexOf(x.category));
+    return `<div class="trow${op ? " open" : ""}">
+      <button data-ti="${x._i}" aria-expanded="${op}">
+        <div class="tn"><span class="no">${i+1}</span><span class="tt">${esc(x.title || "(başlıksız)")}</span>${CHEV}</div>
+        <div class="kv">
+          ${kvc("Tarih", esc(isNaN(x._t) ? x.published : new Date(x._t).toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})))}
+          ${kvc("Kategori", x.category ? `<span class="d" style="background:${color}"></span>${esc(x.category)}` : "", "cat")}
+          ${kvc("Firma / Maps", esc(x.firm))}
+          ${kvc("İl / İlçe", esc([x.city_raw, x.district_raw].filter(Boolean).join(" · ")))}
+        </div>
+      </button>
+      ${op ? `<div class="tx">
+        <div class="kv">${kvc("Mahalle / Bölge", esc(x.neighborhood))}${kvc("Faaliyet", esc(x.activity))}</div>
+        ${x.summary ? `<p>${esc(short(x.summary, 500))}</p>` : ""}
+        <div class="row2">${x.link ? `<a class="btn" href="${esc(x.link)}" target="_blank" rel="noopener">Habere Git ↗</a>` : ""}</div>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+  $("tMore").hidden = r.length <= tN;
+  $("tMore").textContent = `Daha fazla göster (${fmtInt(r.length - tN)} kaldı)`;
+}
+$("tSort").onchange = e => { tSort = e.target.value; tN = 40; tOpen = -1; renderTable(); };
+$("tMore").onclick = () => { tN += 40; renderTable(); };
+$("tlist").addEventListener("click", e => {
+  const b = e.target.closest("[data-ti]"); if (!b) return;
+  const i = +b.dataset.ti; tOpen = tOpen === i ? -1 : i; renderTable();
+});
 
 /* ---------- filter sheet ---------- */
 function openSheet(){
