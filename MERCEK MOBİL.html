@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MERCEK">
+<title>MERCEK – Haber Risk Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020617; --bg2:#0f172a; --card:rgba(15,23,42,.82); --card2:rgba(30,41,59,.9);
+  --line:rgba(148,163,184,.2); --text:#e5e7eb; --muted:#94a3b8; --bright:#f8fafc;
+  --accent:#e6007e; --accent2:#ff4da6; --sky:#38bdf8; --sky-soft:rgba(56,189,248,.13);
+  --r:16px;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+}
+[hidden]{display:none !important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:var(--text); min-height:100vh;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(56,189,248,.14), transparent 35%),
+    radial-gradient(circle at 85% 4%, rgba(230,0,126,.12), transparent 32%),
+    radial-gradient(circle at 50% 90%, rgba(99,102,241,.14), transparent 40%),
+    linear-gradient(180deg,#020617,#0b1224 60%,#0f172a);
+  background-attachment:fixed;
+  padding:calc(var(--sat) + 8px) calc(var(--sar) + 14px) calc(var(--sab) + 84px) calc(var(--sal) + 14px);
+  font-size:15px; line-height:1.45;
+}
+a{color:var(--sky)}
+button{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto}
+
+/* Header */
+header.hero{text-align:center;padding:14px 0 10px}
+.hero h1{margin:0;font-size:clamp(44px,14vw,72px);font-weight:900;letter-spacing:.04em;color:#fff;line-height:1}
+.hero .bar{width:min(260px,70%);height:4px;margin:6px auto 6px;background:linear-gradient(90deg,rgba(230,0,126,0),var(--accent),rgba(230,0,126,0))}
+.hero .sub{font-size:15px;color:#fff;margin:0}
+.hero .unit{font-size:14px;font-weight:700;color:var(--accent2);margin:4px 0 0}
+
+/* Sticky search */
+.sticky{position:sticky;top:0;z-index:20;padding:calc(var(--sat) + 8px) 0 8px;margin:0 -14px;padding-left:14px;padding-right:14px;
+  background:linear-gradient(180deg,rgba(2,6,23,.97) 70%,rgba(2,6,23,0))}
+.searchrow{display:flex;gap:8px}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:0 12px;min-height:46px}
+.search input{flex:1;background:none;border:0;outline:0;color:var(--bright);font:inherit;font-size:16px;min-width:0}
+.search input::placeholder{color:#64748b}
+.iconbtn{position:relative;min-width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card2);display:grid;place-items:center;cursor:pointer}
+.iconbtn .dot[hidden]{display:none}
+.iconbtn .dot{position:absolute;top:-5px;right:-5px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px}
+.active-chips{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+.active-chips::-webkit-scrollbar{display:none}
+.achip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(230,0,126,.15);border:1px solid rgba(230,0,126,.35);color:#fbcfe8;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.achip b{font-weight:600;color:#f9a8d4}
+.achip.clear{background:transparent;border-color:var(--line);color:var(--muted)}
+
+/* Date quick filter */
+.seg{display:flex;gap:6px;margin:10px 0 4px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:none;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--sky-soft);border-color:rgba(56,189,248,.45);color:#bae6fd;font-weight:600}
+
+/* KPI */
+.kpis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(132px,1fr);gap:10px;overflow-x:auto;padding:8px 0 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.kpis::-webkit-scrollbar{display:none}
+.kpi{scroll-snap-align:start;background:linear-gradient(135deg,rgba(30,41,59,.92),rgba(15,23,42,.92));border:1px solid var(--line);border-radius:var(--r);padding:14px;box-shadow:0 14px 30px rgba(0,0,0,.25)}
+.kpi .t{color:var(--muted);font-size:12px}
+.kpi .v{color:var(--bright);font-size:28px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+
+/* Sections */
+.section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
+.section h2{margin:0 0 4px;font-size:17px;color:var(--bright)}
+.section .hint{margin:0 0 12px;color:var(--muted);font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+
+/* Bars */
+.bars{display:flex;flex-direction:column;gap:7px}
+.brow{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;cursor:pointer;border-radius:10px;padding:4px 6px;margin:0 -6px}
+.brow:active{background:rgba(148,163,184,.08)}
+.brow .lbl{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.brow .lbl span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .lbl .n{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.brow .track{height:10px;border-radius:6px;background:rgba(148,163,184,.12);overflow:hidden}
+.brow .fill{height:100%;border-radius:6px;background:var(--sky);transition:width .35s}
+.brow.sel .lbl span:first-child{color:#fff;font-weight:700}
+.brow.sel .track{outline:2px solid rgba(255,255,255,.5)}
+
+/* Treemap-like category tiles */
+.tiles{display:flex;flex-wrap:wrap;gap:6px}
+.tile{border-radius:12px;padding:10px;min-height:70px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;border:2px solid transparent;color:#fff;flex-grow:1}
+.tile .tn{font-weight:700;font-size:13px;line-height:1.2}
+.tile .tv{font-size:12px;opacity:.9}
+.tile .tp{font-size:20px;font-weight:800}
+.tile.sel{border-color:#fff}
+.tile.dim{opacity:.35}
+
+/* Firm list */
+.flist{display:flex;flex-direction:column}
+.fitem{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;font-size:14px}
+.fitem:last-child{border-bottom:0}
+.fitem .c{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+
+/* News cards */
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sky);border-radius:var(--r);padding:14px;margin:10px 0}
+.card h3{margin:0 0 8px;font-size:16px;line-height:1.35;color:var(--bright)}
+.badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;background:var(--sky-soft);border:1px solid rgba(56,189,248,.25);color:#bae6fd;font-size:11.5px;cursor:pointer}
+.badge.cat{background:rgba(230,0,126,.14);border-color:rgba(230,0,126,.35);color:#fbcfe8}
+.badge.date{background:transparent;color:var(--muted);cursor:default}
+.badge.firm{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#bbf7d0}
+.card p.sum{margin:0 0 8px;color:#cbd5e1;font-size:14px}
+.card details{margin:6px 0 10px}
+.card summary{cursor:pointer;color:var(--sky);font-size:13px;list-style:none}
+.card summary::-webkit-details-marker{display:none}
+.card summary::before{content:"▸ ";}
+.card details[open] summary::before{content:"▾ ";}
+.card details div{margin-top:8px;color:#cbd5e1;font-size:13.5px;white-space:pre-wrap}
+.card .meta{font-size:12px;color:var(--muted);margin:0 0 8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border-radius:12px;border:1px solid rgba(56,189,248,.4);background:rgba(56,189,248,.12);color:#e0f2fe !important;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff !important}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--text) !important}
+.btn:disabled{opacity:.45}
+.more{display:flex;justify-content:center;margin:12px 0}
+
+/* Table */
+.tablewrap{overflow:auto;border-radius:12px;border:1px solid var(--line);max-height:70vh}
+table{border-collapse:collapse;font-size:12.5px;min-width:1100px;width:100%}
+th{position:sticky;top:0;background:#1e293b;color:#e2e8f0;padding:8px;text-align:left;font-weight:600;z-index:2}
+td{background:rgba(15,23,42,.85);color:#dbeafe;border-bottom:1px solid rgba(148,163,184,.12);padding:8px;vertical-align:top}
+th:first-child,td:first-child{position:sticky;left:0;z-index:1}
+th:first-child{z-index:3}
+td:first-child{background:#0f172a}
+td.title{min-width:220px;font-weight:600;color:#f1f5f9}
+td.sumc{min-width:260px;color:#cbd5e1}
+
+/* Data panel */
+.drop{display:block;cursor:pointer;border:2px dashed rgba(148,163,184,.35);border-radius:var(--r);padding:22px 14px;text-align:center;color:var(--muted)}
+.drop.over{border-color:var(--sky);background:var(--sky-soft)}
+.drop strong{display:block;color:var(--bright);font-size:16px;margin-bottom:4px}
+.drop input{display:none}
+.info{font-size:13.5px;color:#cbd5e1;margin:12px 0 0}
+.info div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.info div span:last-child{color:var(--bright);text-align:right}
+.rowbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.msg{margin:10px 0 0;font-size:13.5px;padding:10px 12px;border-radius:12px}
+.msg.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#bbf7d0}
+.msg.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca}
+
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;
+  background:rgba(2,6,23,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  padding:6px calc(var(--sar) + 6px) calc(var(--sab) + 6px) calc(var(--sal) + 6px)}
+nav.tabs .in{display:flex;width:100%;max-width:760px}
+nav.tabs a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);text-decoration:none;font-size:11.5px;font-weight:600;border-radius:12px}
+nav.tabs a svg{width:22px;height:22px}
+nav.tabs a.on{color:#fff}
+nav.tabs a.on svg{stroke:var(--accent2)}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:86vh;display:flex;flex-direction:column;
+  background:#0b1224;border-top:1px solid var(--line);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .25s ease;
+  padding-bottom:var(--sab);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet .grab{width:42px;height:5px;border-radius:3px;background:#334155;margin:8px auto 4px}
+.sheet .head{display:flex;justify-content:space-between;align-items:center;padding:6px 16px 10px;border-bottom:1px solid var(--line)}
+.sheet .head h2{margin:0;font-size:18px}
+.sheet .body{overflow-y:auto;padding:6px 16px 16px;-webkit-overflow-scrolling:touch}
+.sheet .foot{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line)}
+.sheet .foot .btn{flex:1}
+.fgroup{margin-top:14px}
+.fgroup h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between}
+.fgroup input.fsearch{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;color:#fff;font:inherit;font-size:15px;margin-bottom:8px;outline:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow-y:auto}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 12px;font-size:13.5px;cursor:pointer;color:#cbd5e1}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.chip .c{opacity:.6;margin-left:4px;font-size:12px}
+
+.view{display:none}
+.view.on{display:block}
+.footer{color:#475569;font-size:11.5px;text-align:center;margin:20px 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>MERCEK</h1>
+    <div class="bar"></div>
+    <p class="sub">Medya Erken Risk Kontrol ve İzleme Platformu</p>
+    <p class="unit">Kredi İzleme Müdürlüğü</p>
+  </header>
+
+  <div class="sticky">
+    <div class="searchrow">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Başlık, firma, il, içerik ara" autocomplete="off" enterkeyhint="search">
+      </label>
+      <button class="iconbtn" id="openFilters" aria-label="Filtreler">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e5e7eb" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        <span class="dot" id="fcount" hidden>0</span>
+      </button>
+    </div>
+    <div class="active-chips" id="activeChips"></div>
+  </div>
+
+  <div class="seg" id="dateSeg">
+    <button data-d="0" class="on">Tümü</button>
+    <button data-d="1">Son 1 gün</button>
+    <button data-d="3">Son 3 gün</button>
+    <button data-d="7">Son 7 gün</button>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <!-- PANEL -->
+  <section class="view" id="v-panel">
+    <div class="section">
+      <h2>Risk Kategorileri</h2>
+      <p class="hint">Bir kategoriye dokunarak filtreleyin.</p>
+      <div class="tiles" id="catTiles"></div>
+    </div>
+    <div class="section">
+      <h2>İl Bazlı Yoğunluk</h2>
+      <p class="hint">İlk 12 il · dokunarak filtreleyin.</p>
+      <div class="bars" id="cityBars"></div>
+    </div>
+    <div class="section">
+      <h2>İlçe Dağılımı</h2>
+      <p class="hint">İlk 12 ilçe · dokunarak filtreleyin.</p>
+      <div class="bars" id="distBars"></div>
+    </div>
+    <div class="section">
+      <h2>Firma / Maps Listesi</h2>
+      <p class="hint">En çok haberi olan 8 aday.</p>
+      <div class="flist" id="firmList"></div>
+    </div>
+  </section>
+
+  <!-- NEWS -->
+  <section class="view" id="v-haberler">
+    <div id="cards"></div>
+    <div class="more"><button class="btn ghost" id="moreBtn" hidden>Daha fazla göster</button></div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="view" id="v-tablo">
+    <div class="section" style="padding:10px">
+      <h2 style="padding:4px 4px 0">Kontrol Tablosu</h2>
+      <p class="hint" style="padding:0 4px">Yana kaydırın · başlık sütunu sabit.</p>
+      <div class="tablewrap"><table id="tbl"></table></div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section class="view" id="v-veri">
+    <div class="section">
+      <h2>Veri</h2>
+      <p class="hint">Python taramasının ürettiği <b>haberler_final.csv</b> dosyasını yükleyin.</p>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".csv,text/csv,text/plain">
+        <strong>CSV seç</strong>
+        Dokunun ya da dosyayı buraya bırakın
+      </label>
+      <div id="loadMsg"></div>
+      <div class="info" id="info"></div>
+      <div class="rowbtns">
+        <button class="btn" id="dlFiltered" hidden>Filtreli CSV indir</button>
+        <button class="btn ghost" id="dlAll" hidden>Tüm CSV indir</button>
+        <button class="btn ghost" id="clearData" hidden>Veriyi temizle</button>
+        <button class="btn primary" id="refresh" hidden>Son taramayı yenile</button>
+      </div>
+      <p class="note">Yüklenen veri yalnızca bu cihazın tarayıcısında saklanır. Yeni tarama sonrası CSV'yi tekrar yüklemeniz yeterli.</p>
+    </div>
+  </section>
+
+  <p class="footer">MERCEK · Haber Risk Monitor</p>
+</div>
+
+<nav class="tabs"><div class="in">
+  <a href="#panel" data-v="panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panel</a>
+  <a href="#haberler" data-v="haberler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h13v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v9a2 2 0 0 1-2 2"/><path d="M8 9h5M8 13h5"/></svg>Haberler</a>
+  <a href="#tablo" data-v="tablo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Tablo</a>
+  <a href="#veri" data-v="veri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Veri</a>
+</div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Filtreler">
+  <div class="grab"></div>
+  <div class="head"><h2>Filtreler</h2><button class="btn ghost" id="closeSheet" style="min-height:36px">Kapat</button></div>
+  <div class="body" id="sheetBody"></div>
+  <div class="foot">
+    <button class="btn ghost" id="resetFilters">Temizle</button>
+    <button class="btn primary" id="applyFilters">Sonuçları göster</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- helpers (ported from dashboard.py) ---------- */
+const clean = x => String(x == null ? "" : x).replace(/\s+/g," ").trim();
+const splitMulti = v => { v = clean(v); if(!v) return []; return v.split(/\s*\|\s*|,\s*|;\s*/).map(clean).filter(Boolean); };
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = u => { u = clean(u); return /^https?:\/\//i.test(u) ? u : ""; };
+const short = (t,n) => { t = clean(t); return t.length <= n ? t : t.slice(0,n).trimEnd() + "..."; };
+const trLower = s => String(s).toLocaleLowerCase("tr-TR");
+const fmtInt = n => Number(n).toLocaleString("tr-TR");
+
+const CAT_COLORS = {
+  "Fiziksel Risk / Yangın":"#f97316",
+  "Kara Para / MASAK / Bahis":"#a855f7",
+  "Dolandırıcılık / Sahtecilik":"#ef4444",
+  "İflas / Konkordato / Mali Sorun":"#eab308",
+  "Operasyon / Soruşturma / Suç":"#3b82f6",
+  "Banka / Finansal Kuruluş":"#14b8a6",
+  "Diğer":"#64748b"
+};
+const PALETTE = ["#3b82f6","#f97316","#a855f7","#14b8a6","#ef4444","#eab308","#ec4899","#22c55e","#64748b"];
+function catColor(c, i){ return CAT_COLORS[c] || PALETTE[i % PALETTE.length]; }
+
+/* ---------- storage (convenience only) ---------- */
+const LS_KEY = "mercek_data_v1", LS_UI = "mercek_ui_v1";
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function lsSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ return false; } }
+function lsDel(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+/* ---------- CSV ---------- */
+function parseCSV(text){
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  // delimiter sniff: comma vs semicolon (Excel TR saves with ;)
+  const firstLine = text.slice(0, text.indexOf("\n") > -1 ? text.indexOf("\n") : text.length);
+  const delim = (firstLine.split(";").length > firstLine.split(",").length) ? ";" : ",";
+  const rows = []; let row = [], field = "", i = 0, inQ = false; const n = text.length;
+  while (i < n){
+    const c = text[i];
+    if (inQ){
+      if (c === '"'){ if (text[i+1] === '"'){ field += '"'; i += 2; continue; } inQ = false; i++; continue; }
+      field += c; i++; continue;
+    }
+    if (c === '"'){ inQ = true; i++; continue; }
+    if (c === delim){ row.push(field); field = ""; i++; continue; }
+    if (c === "\r"){ i++; continue; }
+    if (c === "\n"){ row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
+    field += c; i++;
+  }
+  if (field !== "" || row.length){ row.push(field); rows.push(row); }
+  if (!rows.length) return [];
+  const header = rows[0].map(h => clean(h));
+  const out = [];
+  for (let r = 1; r < rows.length; r++){
+    const cells = rows[r];
+    if (cells.length === 1 && !clean(cells[0])) continue;
+    const o = {};
+    header.forEach((h, j) => { o[h] = cells[j] == null ? "" : cells[j]; });
+    out.push(o);
+  }
+  return out;
+}
+function toCSV(rows, cols){
+  const q = v => { v = String(v == null ? "" : v); return /[",\n\r;]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
+  return "﻿" + [cols.map(q).join(",")].concat(rows.map(r => cols.map(c => q(r[c])).join(","))).join("\r\n");
+}
+
+/* ---------- state ---------- */
+let RAW = [];          // original rows (for "Tüm CSV")
+let COLS = [];         // original column order
+let DF = [];           // prepared rows
+let META = null;       // {name, loadedAt, rows}
+const F = { category:new Set(), city:new Set(), district:new Set(), firm:new Set(), q:"", days:0 };
+let pending = null;    // filters being edited in sheet
+let shown = 30;
+
+function prepare(rows){
+  return rows.map((r, idx) => {
+    const company = clean(r.company_candidates), maps = clean(r.maps_best_guess);
+    const d = parseDate(r.published);
+    const content = clean(r.content) || clean(r.raw_text);
+    return {
+      _i: idx,
+      published: clean(r.published),
+      _t: d ? d.getTime() : NaN,
+      category: clean(r.category),
+      title: clean(r.title),
+      summary: clean(r.summary),
+      content: content,
+      city: splitMulti(r.city_candidates),
+      district: splitMulti(r.district_candidates),
+      neighborhood: clean(r.neighborhood_candidates),
+      firm: company ? company : maps,
+      activity: clean(r.activity_candidates) || clean(r.activity_type) || clean(r.facility_candidates),
+      link: safeUrl(r.link),
+      city_raw: clean(r.city_candidates), district_raw: clean(r.district_candidates),
+      _search: trLower([r.title, r.summary, content, company || maps, r.city_candidates, r.district_candidates].map(clean).join(" \u0001 "))
+    };
+  });
+}
+function parseDate(s){
+  s = clean(s); if (!s) return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) return new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0)));
+  const d = new Date(s); return isNaN(d) ? null : d;
+}
+
+/* ---------- filtering ---------- */
+function applyFilters(){
+  let rows = DF;
+  if (F.days){
+    const maxT = Math.max(...DF.map(r => r._t).filter(t => !isNaN(t)));
+    if (isFinite(maxT)){
+      const cut = maxT - F.days * 864e5;
+      rows = rows.filter(r => !isNaN(r._t) && r._t > cut);
+    }
+  }
+  if (F.category.size) rows = rows.filter(r => F.category.has(r.category));
+  if (F.city.size) rows = rows.filter(r => r.city.some(c => F.city.has(c)));
+  if (F.district.size) rows = rows.filter(r => r.district.some(c => F.district.has(c)));
+  if (F.firm.size) rows = rows.filter(r => F.firm.has(r.firm));
+  if (F.q){ const s = trLower(F.q.trim()); rows = rows.filter(r => r._search.includes(s)); }
+  return rows.slice().sort((a,b) => (isNaN(b._t) ? -Infinity : b._t) - (isNaN(a._t) ? -Infinity : a._t));
+}
+function countBy(rows, getter, multi){
+  const m = new Map();
+  rows.forEach(r => { const v = getter(r); (multi ? v : [v]).forEach(x => { if (x) m.set(x, (m.get(x)||0) + 1); }); });
+  return [...m.entries()].sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0],"tr"));
+}
+
+/* ---------- render ---------- */
+const $ = id => document.getElementById(id);
+let FILTERED = [];
+
+function render(){
+  FILTERED = applyFilters();
+  renderKpis(); renderActiveChips(); renderPanel(); renderCards(true); renderTable(); renderInfo();
+  saveUI();
+}
+function renderKpis(){
+  const r = FILTERED;
+  const k = [
+    ["Toplam Haber", DF.length],
+    ["Filtreli Haber", r.length],
+    ["Kategori", new Set(r.map(x => x.category).filter(Boolean)).size],
+    ["İl", new Set(r.flatMap(x => x.city)).size],
+    ["Firma / Maps", new Set(r.map(x => x.firm).filter(Boolean)).size]
+  ];
+  $("kpis").innerHTML = k.map(([t,v]) => `<div class="kpi"><div class="t">${t}</div><div class="v">${fmtInt(v)}</div></div>`).join("");
+}
+function renderActiveChips(){
+  const parts = [];
+  const add = (key, label, val) => parts.push(`<button class="achip" data-k="${key}" data-v="${esc(val)}"><b>${label}:</b> ${esc(val)} ✕</button>`);
+  F.category.forEach(v => add("category","Kategori",v));
+  F.city.forEach(v => add("city","İl",v));
+  F.district.forEach(v => add("district","İlçe",v));
+  F.firm.forEach(v => add("firm","Firma",v));
+  const n = F.category.size + F.city.size + F.district.size + F.firm.size;
+  if (n > 1 || (n && F.q)) parts.push(`<button class="achip clear" data-k="__all">Tümünü temizle</button>`);
+  $("activeChips").innerHTML = parts.join("");
+  $("activeChips").style.display = parts.length ? "flex" : "none";
+  const fc = $("fcount"); fc.textContent = n; fc.hidden = !n;
+}
+function renderPanel(){
+  const r = FILTERED;
+  if (!DF.length){
+    ["catTiles","cityBars","distBars","firmList"].forEach(id => $(id).innerHTML = `<div class="empty">Veri yok. <a href="#veri">CSV yükleyin</a>.</div>`);
+    return;
+  }
+  // Category tiles (treemap-like: width proportional)
+  const cats = countBy(r, x => x.category);
+  const total = cats.reduce((s,[,n]) => s+n, 0);
+  $("catTiles").innerHTML = cats.length ? cats.map(([c,n],i) => {
+    const pct = n/total*100;
+    const basis = Math.max(30, Math.round(pct)) + "%";
+    const sel = F.category.has(c), dim = F.category.size && !sel;
+    return `<div class="tile${sel?" sel":""}${dim?" dim":""}" data-k="category" data-v="${esc(c)}" style="background:${catColor(c,i)};flex-basis:calc(${basis} - 6px)">
+      <div class="tn">${esc(c)}</div><div><div class="tp">%${pct.toFixed(1).replace(".",",")}</div><div class="tv">${fmtInt(n)} haber</div></div></div>`;
+  }).join("") : `<div class="empty">Kategori verisi yok.</div>`;
+
+  barList("cityBars", countBy(r, x => x.city, true).slice(0,12), "city", "İl verisi yok.", "#38bdf8");
+  barList("distBars", countBy(r, x => x.district, true).slice(0,12), "district", "İlçe verisi yok.", "#818cf8");
+
+  const firms = countBy(r, x => x.firm).slice(0,8);
+  $("firmList").innerHTML = firms.length ? firms.map(([f,n]) =>
+    `<div class="fitem" data-k="firm" data-v="${esc(f)}"><span>${esc(f)}</span><span class="c">${fmtInt(n)}</span></div>`).join("")
+    : `<div class="empty">Firma / Maps verisi yok.</div>`;
+}
+function barList(id, items, key, emptyMsg, color){
+  if (!items.length){ $(id).innerHTML = `<div class="empty">${emptyMsg}</div>`; return; }
+  const max = items[0][1];
+  $(id).innerHTML = items.map(([v,n]) => {
+    const sel = F[key].has(v);
+    return `<div class="brow${sel?" sel":""}" data-k="${key}" data-v="${esc(v)}">
+      <div class="lbl"><span>${esc(v)}</span><span class="n">${fmtInt(n)}</span></div>
+      <div class="track"><div class="fill" style="width:${(n/max*100).toFixed(1)}%;background:${color}"></div></div></div>`;
+  }).join("");
+}
+function renderCards(reset){
+  if (reset) shown = 30;
+  const r = FILTERED;
+  if (!DF.length){ $("cards").innerHTML = `<div class="section"><div class="empty">Henüz veri yok. <a href="#veri">Veri</a> sekmesinden CSV yükleyin.</div></div>`; $("moreBtn").hidden = true; return; }
+  if (!r.length){ $("cards").innerHTML = `<div class="section"><div class="empty">Filtrelere uyan haber yok.</div></div>`; $("moreBtn").hidden = true; return; }
+  const cats = countBy(DF, x => x.category).map(x => x[0]);
+  $("cards").innerHTML = r.slice(0, shown).map(x => {
+    const color = catColor(x.category, cats.indexOf(x.category));
+    const b = [];
+    if (x.category) b.push(`<span class="badge cat" data-k="category" data-v="${esc(x.category)}">${esc(x.category)}</span>`);
+    x.city.forEach(c => b.push(`<span class="badge" data-k="city" data-v="${esc(c)}">${esc(c)}</span>`));
+    x.district.forEach(c => b.push(`<span class="badge" data-k="district" data-v="${esc(c)}">${esc(c)}</span>`));
+    if (x.firm) b.push(`<span class="badge firm" data-k="firm" data-v="${esc(x.firm)}">${esc(x.firm)}</span>`);
+    if (x.published) b.push(`<span class="badge date">${esc(x.published)}</span>`);
+    const extra = [];
+    if (x.neighborhood) extra.push("Mahalle/Bölge: " + esc(x.neighborhood));
+    if (x.activity) extra.push("Faaliyet: " + esc(x.activity));
+    return `<article class="card" style="border-left-color:${color}">
+      <h3>${esc(x.title || "(başlıksız)")}</h3>
+      ${b.length ? `<div class="badges">${b.join("")}</div>` : ""}
+      ${x.summary ? `<p class="sum">${esc(x.summary)}</p>` : ""}
+      ${extra.length ? `<p class="meta">${extra.join(" · ")}</p>` : ""}
+      ${x.content && x.content !== x.summary ? `<details><summary>İçerik önizleme</summary><div>${esc(short(x.content,1200))}</div></details>` : ""}
+      ${x.link ? `<a class="btn" href="${esc(x.link)}" target="_blank" rel="noopener">Habere Git ↗</a>` : ""}
+    </article>`;
+  }).join("");
+  $("moreBtn").hidden = r.length <= shown;
+  $("moreBtn").textContent = `Daha fazla göster (${fmtInt(r.length - shown)} kaldı)`;
+}
+function renderTable(){
+  const r = FILTERED;
+  const head = ["Başlık","Tarih","Kategori","Özet","İl","İlçe","Mahalle / Bölge","Firma / Maps","Faaliyet","Link"];
+  if (!r.length){ $("tbl").innerHTML = `<tr><td style="position:static">${DF.length ? "Filtrelere uyan haber yok." : "Veri yok."}</td></tr>`; return; }
+  const rows = r.slice(0, 300).map(x => `<tr>
+    <td class="title">${esc(x.title)}</td><td>${esc(x.published)}</td><td>${esc(x.category)}</td>
+    <td class="sumc">${esc(short(x.summary, 300))}</td><td>${esc(x.city_raw)}</td><td>${esc(x.district_raw)}</td>
+    <td>${esc(x.neighborhood)}</td><td>${esc(x.firm)}</td><td>${esc(x.activity)}</td>
+    <td>${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">Habere Git</a>` : ""}</td></tr>`).join("");
+  $("tbl").innerHTML = `<thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody>` +
+    (r.length > 300 ? `<tfoot><tr><td colspan="10" style="position:static;color:#94a3b8">İlk 300 kayıt gösteriliyor (${fmtInt(r.length)} kayıt). Tamamı için filtreli CSV indirin.</td></tr></tfoot>` : "");
+}
+function renderInfo(){
+  if (!META){ $("info").innerHTML = ""; ["dlFiltered","dlAll","clearData"].forEach(id => $(id).hidden = true); return; }
+  const dates = DF.map(r => r._t).filter(t => !isNaN(t));
+  const fmtD = t => new Date(t).toISOString().slice(0,10);
+  $("info").innerHTML = `
+    <div><span>Dosya</span><span>${esc(META.name)}</span></div>
+    <div><span>Güncelleme</span><span>${esc(new Date(META.loadedAt).toLocaleString("tr-TR"))}</span></div>
+    <div><span>Kayıt</span><span>${fmtInt(DF.length)}</span></div>
+    ${dates.length ? `<div><span>Haber tarihleri</span><span>${fmtD(Math.min(...dates))} → ${fmtD(Math.max(...dates))}</span></div>` : ""}`;
+  $("clearData").hidden = false;
+  $("dlFiltered").hidden = !downloads || !RAW.length;
+  $("dlAll").hidden = !downloads || !RAW.length;
+}
+
+/* ---------- filter sheet ---------- */
+function openSheet(){
+  pending = { category:new Set(F.category), city:new Set(F.city), district:new Set(F.district), firm:new Set(F.firm) };
+  buildSheet();
+  $("scrim").classList.add("open"); $("sheet").classList.add("open");
+}
+function closeSheet(){ $("scrim").classList.remove("open"); $("sheet").classList.remove("open"); pending = null; }
+function buildSheet(){
+  const groups = [
+    ["category","Kategori", countBy(DF, x => x.category)],
+    ["city","İl", countBy(DF, x => x.city, true)],
+    ["district","İlçe", countBy(DF, x => x.district, true)],
+    ["firm","Firma / Maps Adayı", countBy(DF, x => x.firm)]
+  ];
+  if (!DF.length){ $("sheetBody").innerHTML = `<div class="empty" style="padding:20px 0">Önce veri yükleyin.</div>`; return; }
+  $("sheetBody").innerHTML = groups.map(([k,label,items]) => `
+    <div class="fgroup" data-g="${k}">
+      <h3><span>${label}</span><span>${pending[k].size ? pending[k].size + " seçili" : ""}</span></h3>
+      ${items.length > 12 ? `<input class="fsearch" placeholder="${label} ara" data-g="${k}">` : ""}
+      <div class="chips">${items.length ? items.map(([v,n]) =>
+        `<button class="chip${pending[k].has(v)?" on":""}" data-g="${k}" data-v="${esc(v)}">${esc(v)}<span class="c">${n}</span></button>`).join("")
+        : `<span class="empty">Veri yok</span>`}</div>
+    </div>`).join("");
+}
+$("sheetBody").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c || !pending) return;
+  const g = c.dataset.g, v = c.dataset.v;
+  pending[g].has(v) ? pending[g].delete(v) : pending[g].add(v);
+  c.classList.toggle("on");
+  const h = c.closest(".fgroup").querySelector("h3 span:last-child");
+  h.textContent = pending[g].size ? pending[g].size + " seçili" : "";
+});
+$("sheetBody").addEventListener("input", e => {
+  const inp = e.target.closest(".fsearch"); if (!inp) return;
+  const s = trLower(inp.value.trim());
+  inp.parentElement.querySelectorAll(".chip").forEach(ch => { ch.style.display = !s || trLower(ch.dataset.v).includes(s) ? "" : "none"; });
+});
+$("openFilters").onclick = openSheet;
+$("closeSheet").onclick = closeSheet;
+$("scrim").onclick = closeSheet;
+$("resetFilters").onclick = () => { if (!pending) return; Object.values(pending).forEach(s => s.clear()); buildSheet(); };
+$("applyFilters").onclick = () => {
+  if (pending){ ["category","city","district","firm"].forEach(k => F[k] = pending[k]); }
+  closeSheet(); render();
+};
+
+/* toggle filter by tapping charts / badges / chips */
+function toggleFilter(k, v){
+  if (k === "__all"){ ["category","city","district","firm"].forEach(x => F[x].clear()); F.q = ""; $("q").value = ""; render(); return; }
+  if (!F[k]) return;
+  F[k].has(v) ? F[k].delete(v) : F[k].add(v);
+  render();
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-k]");
+  if (!el || el.closest("#sheet")) return;
+  toggleFilter(el.dataset.k, el.dataset.v);
+});
+
+/* search */
+let qT;
+$("q").addEventListener("input", e => { clearTimeout(qT); qT = setTimeout(() => { F.q = e.target.value; render(); }, 180); });
+
+/* date seg */
+$("dateSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  F.days = +b.dataset.d; syncSeg(); render();
+});
+function syncSeg(){ $("dateSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.d === F.days)); }
+
+$("moreBtn").onclick = () => { shown += 30; renderCards(false); };
+
+/* ---------- views (hash) ---------- */
+const VIEWS = ["panel","haberler","tablo","veri"];
+function showView(){
+  let v = (location.hash || "").replace("#","");
+  if (!VIEWS.includes(v)) v = DF.length ? "panel" : "veri";
+  VIEWS.forEach(x => $("v-" + x).classList.toggle("on", x === v));
+  document.querySelectorAll("nav.tabs a").forEach(a => a.classList.toggle("on", a.dataset.v === v));
+  const showTop = v !== "veri";
+  $("dateSeg").style.display = showTop ? "" : "none";
+  $("kpis").style.display = showTop ? "" : "none";
+}
+window.addEventListener("hashchange", () => { showView(); window.scrollTo({top:0}); });
+
+/* ---------- loading ---------- */
+function msg(text, ok){ $("loadMsg").innerHTML = text ? `<div class="msg ${ok?"ok":"err"}">${text}</div>` : ""; }
+function loadText(text, name, persist){
+  let rows;
+  try { rows = parseCSV(text); } catch(e){ msg("CSV okunamadı: " + esc(e.message), false); return false; }
+  if (!rows.length){ msg("CSV boş görünüyor.", false); return false; }
+  const cols = Object.keys(rows[0]);
+  if (!cols.includes("title") && !cols.includes("published")){
+    msg("Bu dosyada <b>title</b> / <b>published</b> sütunları yok. haberler_final.csv dosyasını seçtiğinizden emin olun.", false); return false;
+  }
+  RAW = rows; COLS = cols; DF = prepare(rows);
+  META = { name: name, loadedAt: Date.now(), rows: rows.length };
+  ["category","city","district","firm"].forEach(k => F[k].clear());
+  if (persist){
+    // keep a trimmed copy for next visit on this device
+    const keep = ["published","category","title","summary","content","raw_text","city_candidates","district_candidates",
+      "neighborhood_candidates","company_candidates","activity_candidates","activity_type","facility_candidates","maps_best_guess","link"];
+    const slim = rows.map(r => { const o = {}; keep.forEach(k => { if (r[k] != null && r[k] !== "") o[k] = (k === "raw_text" || k === "content") ? String(r[k]).slice(0,1500) : r[k]; }); return o; });
+    const ok = lsSet(LS_KEY, JSON.stringify({ meta: META, rows: slim }));
+    msg(`${fmtInt(rows.length)} haber yüklendi.` + (ok ? "" : " (Dosya büyük olduğu için bu cihazda hatırlanmayacak; bir sonraki açılışta tekrar yükleyin.)"), true);
+  }
+  render(); return true;
+}
+function readFile(f){
+  if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { if (loadText(String(fr.result), f.name, true)) setTimeout(() => { location.hash = "panel"; }, 600); };
+  fr.onerror = () => msg("Dosya okunamadı.", false);
+  fr.readAsText(f, "utf-8");
+}
+$("file").addEventListener("change", e => { readFile(e.target.files[0]); e.target.value = ""; });
+const drop = $("drop");
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => readFile(e.dataTransfer.files[0]));
+
+$("clearData").onclick = () => {
+  lsDel(LS_KEY); RAW = []; COLS = []; DF = []; META = null;
+  ["category","city","district","firm"].forEach(k => F[k].clear()); F.q = ""; $("q").value = "";
+  msg("Veri bu cihazdan silindi.", true); render();
+};
+
+/* ---------- downloads capability ---------- */
+let downloads = null;
+async function save(name, rows){
+  if (!downloads) return;
+  try { await downloads.save({ filename: name, data: toCSV(rows, COLS) }); }
+  catch(e){ if (e && e.code !== "declined" && e.code !== "cancelled") msg("İndirme yapılamadı.", false); }
+}
+$("dlFiltered").onclick = () => save("haberler_filtered.csv", FILTERED.map(x => RAW[x._i]));
+$("dlAll").onclick = () => save("haberler_all.csv", RAW);
+try {
+  if (window.claude && typeof window.claude.use === "function"){
+    window.claude.use("downloads").then(d => { downloads = d; renderInfo(); }).catch(() => {});
+  }
+} catch(e){}
+
+/* ---------- UI memory ---------- */
+function saveUI(){ lsSet(LS_UI, JSON.stringify({ days: F.days })); }
+try { const u = JSON.parse(lsGet(LS_UI) || "{}"); if (u.days) F.days = +u.days || 0; } catch(e){}
+syncSeg();
+
+/* ---------- boot ---------- */
+try {
+  const saved = JSON.parse(lsGet(LS_KEY) || "null");
+  if (saved && Array.isArray(saved.rows) && saved.rows.length){
+    RAW = saved.rows; COLS = Object.keys(saved.rows.reduce((a,r) => Object.assign(a,r), {}));
+    DF = prepare(saved.rows); META = saved.meta || { name:"kayıtlı veri", loadedAt: Date.now() };
+  }
+} catch(e){}
+render(); showView();
+
+/* ---------- otomatik veri: site/data/haberler_final.csv ---------- */
+async function loadRemote(manual){
+  try {
+    const res = await fetch("data/haberler_final.csv?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const lm = res.headers.get("Last-Modified");
+    const ok = loadText(text, "Otomatik tarama", false);
+    if (ok){
+      if (lm && META) META.loadedAt = new Date(lm).getTime() || META.loadedAt;
+      lsDel(LS_KEY);
+      $("refresh").hidden = false;
+      if (manual) msg("Son tarama yüklendi.", true);
+      render(); showView();
+    }
+  } catch(e){ if (manual) msg("Otomatik veri alınamadı. CSV'yi elle yükleyebilirsiniz.", false); }
+}
+$("refresh").onclick = () => loadRemote(true);
+loadRemote(false);
+})();
+</script>
+</body>
+</html>
