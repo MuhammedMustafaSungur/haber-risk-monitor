@@ -428,11 +428,62 @@ const F = { category:new Set(), city:new Set(), district:new Set(), firm:new Set
 let pending = null;    // filters being edited in sheet
 let shown = 30;
 
+/* ---------- ana il tespiti: haberde birden çok il geçse de olayın olduğu ili seçer ---------- */
+const LOCDICT = {"Adana":["Aladağ","Ceyhan","Çukurova","Feke","İmamoğlu","Karaisalı","Karataş","Kozan","Pozantı","Saimbeyli","Sarıçam","Seyhan","Tufanbeyli","Yumurtalık","Yüreğir","Adana Hacı Sabancı OSB"],"Adıyaman":["Besni","Çelikhan","Gerger","Gölbaşı","Kahta","Merkez","Samsat","Sincik","Tut"],"Afyonkarahisar":["Başmakçı","Bayat","Bolvadin","Çay","Çobanlar","Dazkırı","Dinar","Emirdağ","Evciler","Hocalar","İhsaniye","İscehisar","Kızılören","Merkez","Sandıklı","Sinanpaşa","Sultandağı","Şuhut","Afyonkarahisar OSB"],"Ağrı":["Diyadin","Doğubayazıt","Eleşkirt","Hamur","Merkez","Patnos","Taşlıçay","Tutak"],"Aksaray":["Ağaçören","Eskil","Gülağaç","Güzelyurt","Merkez","Ortaköy","Sarıyahşi","Sultanhanı","Aksaray OSB"],"Amasya":["Göynücek","Gümüşhacıköy","Hamamözü","Merkez","Merzifon","Suluova","Taşova","Merzifon OSB"],"Ankara":["Altındağ","Ayaş","Bala","Beypazarı","Çamlıdere","Çankaya","Çubuk","Elmadağ","Etimesgut","Evren","Gölbaşı","Güdül","Haymana","Kalecik","Kazan","Keçiören","Kızılcahamam","Mamak","Nallıhan","Polatlı","Pursaklar","Sincan","Şereflikoçhisar","Yenimahalle","Ostim","İvedik","Siteler","Macunköy","Balgat","Başkent OSB"],"Antalya":["Akseki","Aksu","Alanya","Demre","Döşemealtı","Elmalı","Finike","Gazipaşa","Gündoğmuş","İbradı","Kaş","Kemer","Kepez","Konyaaltı","Korkuteli","Kumluca","Manavgat","Muratpaşa","Serik","Eski Sanayi","Antalya OSB","Altınova","Güzeloba","Kızıltoprak","Çağlayan","Meltem"],"Ardahan":["Çıldır","Damal","Göle","Hanak","Merkez","Posof"],"Artvin":["Ardanuç","Arhavi","Borçka","Hopa","Kemalpaşa","Merkez","Murgul","Şavşat","Yusufeli"],"Aydın":["Bozdoğan","Buharkent","Çine","Didim","Efeler","Germencik","İncirliova","Karacasu","Karpuzlu","Koçarlı","Köşk","Kuşadası","Kuyucak","Nazilli","Söke","Sultanhisar","Yenipazar","Aydın OSB","ASTİM OSB"],"Balıkesir":["Altıeylül","Ayvalık","Balya","Bandırma","Bigadiç","Burhaniye","Dursunbey","Edremit","Erdek","Gönen","Havran","İvrindi","Karesi","Kepsut","Manyas","Marmara","Savaştepe","Sındırgı","Susurluk","Bandırma OSB","Balıkesir OSB"],"Bartın":["Amasra","Kurucaşile","Merkez","Ulus","Bartın OSB"],"Batman":["Beşiri","Gercüş","Hasankeyf","Kozluk","Merkez","Sason","Batman OSB"],"Bayburt":["Aydıntepe","Demirözü","Merkez"],"Bilecik":["Bozüyük","Gölpazarı","İnhisar","Merkez","Osmaneli","Pazaryeri","Söğüt","Yenipazar","Bozüyük OSB","Bilecik OSB"],"Bingöl":["Adaklı","Genç","Karlıova","Kiğı","Merkez","Solhan","Yayladere","Yedisu","Bingöl OSB"],"Bitlis":["Adilcevaz","Ahlat","Güroymak","Hizan","Merkez","Mutki","Tatvan","Tatvan OSB"],"Bolu":["Dörtdivan","Gerede","Göynük","Kıbrıscık","Mengen","Merkez","Mudurnu","Seben","Yeniçağa","Bolu OSB","Gerede OSB"],"Burdur":["Ağlasun","Altınyayla","Bucak","Çavdır","Çeltikçi","Gölhisar","Karamanlı","Kemer","Merkez","Tefenni","Yeşilova","Bucak OSB"],"Bursa":["Büyükorhan","Gemlik","Gürsu","Harmancık","İnegöl","İznik","Karacabey","Keles","Kestel","Mudanya","Mustafakemalpaşa","Nilüfer","Orhaneli","Orhangazi","Osmangazi","Yenişehir","Yıldırım","Demirtaş","NOSAB","Hasanağa OSB","Kayapa","Beşevler"],"Çanakkale":["Ayvacık","Bayramiç","Biga","Bozcaada","Çan","Eceabat","Ezine","Gelibolu","Gökçeada","Lapseki","Merkez","Yenice","Biga OSB","Çanakkale OSB"],"Çankırı":["Atkaracalar","Bayramören","Çerkeş","Eldivan","Ilgaz","Kızılırmak","Korgun","Kurşunlu","Merkez","Orta","Şabanözü","Yapraklı","Çerkeş OSB","Şabanözü OSB"],"Çorum":["Alaca","Bayat","Boğazkale","Dodurga","İskilip","Kargı","Laçin","Mecitözü","Merkez","Oğuzlar","Ortaköy","Osmancık","Sungurlu","Uğurludağ","Çorum OSB","Sungurlu OSB"],"Denizli":["Acıpayam","Babadağ","Baklan","Bekilli","Beyağaç","Bozkurt","Buldan","Çal","Çameli","Çardak","Çivril","Güney","Honaz","Kale","Merkezefendi","Pamukkale","Sarayköy","Serinhisar","Tavas","Denizli OSB","Honaz OSB"],"Diyarbakır":["Bağlar","Bismil","Çermik","Çınar","Çüngüş","Dicle","Eğil","Ergani","Hani","Hazro","Kayapınar","Kocaköy","Kulp","Lice","Silvan","Sur","Yenişehir","Diyarbakır OSB"],"Düzce":["Akçakoca","Cumayeri","Çilimli","Gölyaka","Gümüşova","Kaynaşlı","Merkez","Yığılca","Düzce OSB","Gümüşova OSB"],"Edirne":["Enez","Havsa","İpsala","Keşan","Lalapaşa","Meriç","Merkez","Süloğlu","Uzunköprü","Edirne OSB"],"Elazığ":["Ağın","Alacakaya","Arıcak","Baskil","Karakoçan","Keban","Kovancılar","Maden","Merkez","Palu","Sivrice","Elazığ OSB"],"Erzincan":["Çayırlı","İliç","Kemah","Kemaliye","Merkez","Otlukbeli","Refahiye","Tercan","Üzümlü","Erzincan OSB"],"Erzurum":["Aşkale","Aziziye","Çat","Hınıs","Horasan","İspir","Karaçoban","Karayazı","Köprüköy","Narman","Oltu","Olur","Palandöken","Pasinler","Pazaryolu","Şenkaya","Tekman","Tortum","Uzundere","Yakutiye","Erzurum OSB"],"Eskişehir":["Alpu","Beylikova","Çifteler","Günyüzü","Han","İnönü","Mahmudiye","Mihalgazi","Mihalıççık","Odunpazarı","Sarıcakaya","Seyitgazi","Sivrihisar","Tepebaşı","Eskişehir OSB","Teksan","Baksan"],"Gaziantep":["Araban","İslahiye","Karkamış","Nizip","Nurdağı","Oğuzeli","Şahinbey","Şehitkamil","Yavuzeli","Başpınar","Gaziantep OSB","KÜSGET","Ünaldı"],"Giresun":["Alucra","Bulancak","Çamoluk","Çanakçı","Dereli","Doğankent","Espiye","Eynesil","Görele","Güce","Keşap","Merkez","Piraziz","Şebinkarahisar","Tirebolu","Yağlıdere","Giresun OSB"],"Gümüşhane":["Kelkit","Köse","Kürtün","Merkez","Şiran","Torul"],"Hakkari":["Çukurca","Derecik","Merkez","Şemdinli","Yüksekova"],"Hatay":["Altınözü","Antakya","Arsuz","Belen","Defne","Dörtyol","Erzin","Hassa","İskenderun","Kırıkhan","Kumlu","Payas","Reyhanlı","Samandağ","Yayladağı","Payas OSB","İskenderun OSB","Antakya OSB"],"Iğdır":["Aralık","Karakoyunlu","Merkez","Tuzluca","Iğdır OSB"],"Isparta":["Aksu","Atabey","Eğirdir","Gelendost","Gönen","Keçiborlu","Merkez","Senirkent","Sütçüler","Şarkikaraağaç","Uluborlu","Yalvaç","Yenişarbademli","Isparta OSB"],"İstanbul":["Adalar","Arnavutköy","Ataşehir","Avcılar","Bağcılar","Bahçelievler","Bakırköy","Başakşehir","Bayrampaşa","Beşiktaş","Beykoz","Beylikdüzü","Beyoğlu","Büyükçekmece","Çatalca","Çekmeköy","Esenler","Esenyurt","Eyüpsultan","Fatih","Gaziosmanpaşa","Güngören","Kadıköy","Kağıthane","Kartal","Küçükçekmece","Maltepe","Pendik","Sancaktepe","Sarıyer","Silivri","Sultanbeyli","Sultangazi","Şile","Şişli","Tuzla","Ümraniye","Üsküdar","Zeytinburnu","İkitelli","Dudullu","Merter","Maslak","Levent","Hadımköy","Tuzla OSB","İMES","Perpa"],"İzmir":["Aliağa","Balçova","Bayındır","Bayraklı","Bergama","Bornova","Buca","Çeşme","Çiğli","Dikili","Foça","Gaziemir","Güzelbahçe","Karabağlar","Karaburun","Karşıyaka","Kemalpaşa","Kınık","Kiraz","Konak","Menderes","Menemen","Narlıdere","Ödemiş","Seferihisar","Selçuk","Tire","Torbalı","Urla","Işıkkent","Pınarbaşı","Atatürk OSB","Kemalpaşa OSB"],"Kahramanmaraş":["Afşin","Andırın","Çağlayancerit","Dulkadiroğlu","Ekinözü","Elbistan","Göksun","Nurhak","Onikişubat","Pazarcık","Türkoğlu","Kahramanmaraş OSB","Türkoğlu OSB"],"Karabük":["Eflani","Eskipazar","Merkez","Ovacık","Safranbolu","Yenice","Karabük OSB"],"Karaman":["Ayrancı","Başyayla","Ermenek","Kazımkarabekir","Merkez","Sarıveliler","Karaman OSB"],"Kars":["Akyaka","Arpaçay","Digor","Kağızman","Merkez","Sarıkamış","Selim","Susuz"],"Kastamonu":["Abana","Ağlı","Araç","Azdavay","Bozkurt","Cide","Çatalzeytin","Daday","Devrekani","Doğanyurt","Hanönü","İhsangazi","İnebolu","Küre","Merkez","Pınarbaşı","Seydiler","Şenpazar","Taşköprü","Tosya","Kastamonu OSB","Tosya OSB"],"Kayseri":["Akkışla","Bünyan","Develi","Felahiye","Hacılar","İncesu","Kocasinan","Melikgazi","Özvatan","Pınarbaşı","Sarıoğlan","Sarız","Talas","Tomarza","Yahyalı","Yeşilhisar","Kayseri OSB","Mimarsinan OSB","İncesu OSB"],"Kırıkkale":["Bahşılı","Balışeyh","Çelebi","Delice","Karakeçili","Keskin","Merkez","Sulakyurt","Yahşihan","Kırıkkale OSB"],"Kırklareli":["Babaeski","Demirköy","Kofçaz","Lüleburgaz","Merkez","Pehlivanköy","Pınarhisar","Vize","Lüleburgaz OSB","Kırklareli OSB"],"Kırşehir":["Akçakent","Akpınar","Boztepe","Çiçekdağı","Kaman","Merkez","Mucur","Kırşehir OSB"],"Kilis":["Elbeyli","Merkez","Musabeyli","Polateli","Kilis OSB"],"Kocaeli":["Başiskele","Çayırova","Darıca","Derince","Dilovası","Gebze","Gölcük","İzmit","Kandıra","Karamürsel","Kartepe","Körfez","Gebze OSB","Dilovası OSB","TOSB","Arslanbey","Alikahya"],"Konya":["Ahırlı","Akören","Akşehir","Altınekin","Beyşehir","Bozkır","Cihanbeyli","Çeltik","Çumra","Derbent","Derebucak","Doğanhisar","Emirgazi","Ereğli","Güneysınır","Hadim","Halkapınar","Hüyük","Ilgın","Kadınhanı","Karapınar","Karatay","Kulu","Meram","Sarayönü","Selçuklu","Seydişehir","Taşkent","Tuzlukçu","Yalıhüyük","Yunak","Büsan","Konsan","Horozluhan","Konya OSB"],"Kütahya":["Altıntaş","Aslanapa","Çavdarhisar","Domaniç","Dumlupınar","Emet","Gediz","Hisarcık","Merkez","Pazarlar","Simav","Şaphane","Tavşanlı","Kütahya OSB","Tavşanlı OSB"],"Malatya":["Akçadağ","Arapgir","Arguvan","Battalgazi","Darende","Doğanşehir","Doğanyol","Hekimhan","Kale","Kuluncak","Pütürge","Yazıhan","Yeşilyurt","Malatya OSB"],"Manisa":["Ahmetli","Akhisar","Alaşehir","Demirci","Gölmarmara","Gördes","Kırkağaç","Köprübaşı","Kula","Salihli","Sarıgöl","Saruhanlı","Selendi","Soma","Şehzadeler","Turgutlu","Yunusemre","Manisa OSB","Turgutlu OSB","Akhisar OSB"],"Mardin":["Artuklu","Dargeçit","Derik","Kızıltepe","Mazıdağı","Midyat","Nusaybin","Ömerli","Savur","Yeşilli","Mardin OSB","Kızıltepe OSB"],"Mersin":["Akdeniz","Anamur","Aydıncık","Bozyazı","Çamlıyayla","Erdemli","Gülnar","Mezitli","Mut","Silifke","Tarsus","Toroslar","Yenişehir","Kazanlı","Karaduvar","Serbest Bölge","Tarsus OSB","Mersin OSB"],"Muğla":["Bodrum","Dalaman","Datça","Fethiye","Kavaklıdere","Köyceğiz","Marmaris","Menteşe","Milas","Ortaca","Seydikemer","Ula","Yatağan","Milas OSB"],"Muş":["Bulanık","Hasköy","Korkut","Malazgirt","Merkez","Varto","Muş OSB"],"Nevşehir":["Acıgöl","Avanos","Derinkuyu","Gülşehir","Hacıbektaş","Kozaklı","Merkez","Ürgüp","Nevşehir OSB"],"Niğde":["Altunhisar","Bor","Çamardı","Çiftlik","Merkez","Ulukışla","Niğde OSB","Bor OSB"],"Ordu":["Akkuş","Altınordu","Aybastı","Çamaş","Çatalpınar","Çaybaşı","Fatsa","Gölköy","Gülyalı","Gürgentepe","İkizce","Kabadüz","Kabataş","Korgan","Kumru","Mesudiye","Perşembe","Ulubey","Ünye","Fatsa OSB","Ordu OSB"],"Osmaniye":["Bahçe","Düziçi","Hasanbeyli","Kadirli","Merkez","Sumbas","Toprakkale","Osmaniye OSB","Kadirli OSB"],"Rize":["Ardeşen","Çamlıhemşin","Çayeli","Derepazarı","Fındıklı","Güneysu","Hemşin","İkizdere","İyidere","Kalkandere","Merkez","Pazar","Rize OSB"],"Sakarya":["Adapazarı","Akyazı","Arifiye","Erenler","Ferizli","Geyve","Hendek","Karapürçek","Karasu","Kaynarca","Kocaali","Pamukova","Sapanca","Serdivan","Söğütlü","Taraklı","Sakarya OSB","Arifiye","Hanlı","Erenler"],"Samsun":["Alaçam","Asarcık","Atakum","Ayvacık","Bafra","Canik","Çarşamba","Havza","İlkadım","Kavak","Ladik","Ondokuzmayıs","Salıpazarı","Tekkeköy","Terme","Vezirköprü","Yakakent","Tekkeköy","Samsun OSB","Kavak OSB"],"Siirt":["Baykan","Eruh","Kurtalan","Merkez","Pervari","Şirvan","Tillo","Siirt OSB"],"Sinop":["Ayancık","Boyabat","Dikmen","Durağan","Erfelek","Gerze","Merkez","Saraydüzü","Türkeli","Sinop OSB"],"Sivas":["Akıncılar","Altınyayla","Divriği","Doğanşar","Gemerek","Gölova","Gürün","Hafik","İmranlı","Kangal","Koyulhisar","Merkez","Suşehri","Şarkışla","Ulaş","Yıldızeli","Zara","Sivas OSB"],"Şanlıurfa":["Akçakale","Birecik","Bozova","Ceylanpınar","Eyyübiye","Halfeti","Haliliye","Harran","Hilvan","Karaköprü","Siverek","Suruç","Viranşehir","Şanlıurfa OSB"],"Şırnak":["Beytüşşebap","Cizre","Güçlükonak","İdil","Merkez","Silopi","Uludere","Şırnak OSB","Cizre OSB"],"Tekirdağ":["Çerkezköy","Çorlu","Ergene","Hayrabolu","Kapaklı","Malkara","Marmaraereğlisi","Muratlı","Saray","Süleymanpaşa","Şarköy","Çerkezköy OSB","Çorlu OSB","Ergene OSB","Kapaklı OSB"],"Tokat":["Almus","Artova","Başçiftlik","Erbaa","Merkez","Niksar","Pazar","Reşadiye","Sulusaray","Turhal","Yeşilyurt","Zile","Tokat OSB","Erbaa OSB"],"Trabzon":["Akçaabat","Araklı","Arsin","Beşikdüzü","Çarşıbaşı","Çaykara","Dernekpazarı","Düzköy","Hayrat","Köprübaşı","Maçka","Of","Ortahisar","Sürmene","Şalpazarı","Tonya","Vakfıkebir","Yomra","Arsin OSB","Beşikdüzü OSB"],"Tunceli":["Çemişgezek","Hozat","Mazgirt","Merkez","Nazımiye","Ovacık","Pertek","Pülümür"],"Uşak":["Banaz","Eşme","Karahallı","Merkez","Sivaslı","Ulubey","Uşak OSB","Karma OSB"],"Van":["Bahçesaray","Başkale","Çaldıran","Çatak","Edremit","Erciş","Gevaş","Gürpınar","İpekyolu","Muradiye","Özalp","Saray","Tuşba","Van OSB"],"Yalova":["Altınova","Armutlu","Çınarcık","Çiftlikköy","Merkez","Termal","Yalova OSB"],"Yozgat":["Akdağmadeni","Aydıncık","Boğazlıyan","Çandır","Çayıralan","Çekerek","Kadışehri","Merkez","Saraykent","Sarıkaya","Sorgun","Şefaatli","Yenifakılı","Yerköy","Yozgat OSB","Sorgun OSB"],"Zonguldak":["Alaplı","Çaycuma","Devrek","Ereğli","Gökçebey","Kilimli","Kozlu","Merkez","Çaycuma OSB","Ereğli OSB"]};
+// primary city detection
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const L = "a-zçğıöşüâîû";
+const SUF = "(?:['’`]?\\s?(?:da|de|ta|te|dan|den|tan|ten|nın|nin|nun|nün|ın|in|un|ün|ya|ye|a|e|lı|li|lu|lü|daki|deki|taki|teki))";
+const CTX = "(?:\\s+(?:merkezli|merkezinde|ilinde|ilçesinde|ilcesinde|ilçesi|cumhuriyet|osb|organize))";
+const LOC = "(?:['’`]?(?:da|de|ta|te|daki|deki|taki|teki)(?![" + "a-zçğıöşüâîû" + "])|\\s+(?:ilçesi|ilçesinde|ilcesinde|osb|organize))";
+function findIdx(text, name, strong){
+  const n = trLower(name);
+  const re = strong === "loc"
+    ? new RegExp(`(^|[^${L}])${reEsc(n)}${LOC}`, "u")
+    : strong
+    ? new RegExp(`(^|[^${L}])${reEsc(n)}(?:${SUF}(?![${L}])|${CTX})`, "u")
+    : new RegExp(`(^|[^${L}])${reEsc(n)}(?:${SUF})?(?![${L}])`, "u");
+  const m = re.exec(text); return m ? m.index + m[1].length : -1;
+}
+function dateline(text, name){ // "BURSA (DHA)" / "İSTANBUL, (İHA)" / "Bursa -"
+  const up = name.toLocaleUpperCase("tr-TR");
+  const re = new RegExp(`(^|[^A-ZÇĞİÖŞÜ])${reEsc(up)}\\s*,?\\s*\\((?:DHA|İHA|IHA|AA|ANKA)\\)`, "u");
+  const m = re.exec(text); return m ? m.index : -1;
+}
+function makePrimary(LD){
+  const D2C = {}; Object.entries(LD).forEach(([c, ds]) => ds.forEach(d => { if (d === "Merkez") return; (D2C[trLower(d)] = D2C[trLower(d)] || []).push(c); }));
+  return function(x){
+    const cands = x.cityAll; if (!cands.length) return { city:"", why:"" };
+    const title = trLower(x.title);
+    // 1) title
+    let best = null;
+    cands.forEach(c => { const i = findIdx(title, c, false); if (i >= 0 && (!best || i < best.i)) best = { c, i }; });
+    if (best) return { city: best.c, why: "başlık" };
+    const raw = String(x.body || ""), body = trLower(raw).slice(0, 1500);
+    // 2) dateline / strong context early in body
+    cands.forEach(c => { let i = dateline(raw.slice(0,1500), c); if (i < 0) i = findIdx(body, c, true); if (i >= 0 && i < 500 && (!best || i < best.i)) best = { c, i }; });
+    if (best) return { city: best.c, why: "metin başı" };
+    // 3) district of a candidate city with strong context early
+    cands.forEach(c => (LD[c] || []).forEach(d => { if (d === "Merkez") return; const amb = (D2C[trLower(d)] || []).length > 1; const i = findIdx(body, d, "loc"); if (i >= 0 && i < 400 && !amb && (!best || i < best.i)) best = { c, i }; }));
+    if (best) return { city: best.c, why: "ilçe" };
+    // 4) single candidate with strong context anywhere in body
+    if (cands.length === 1 && findIdx(trLower(raw), cands[0], true) >= 0) return { city: cands[0], why: "metin" };
+    return { city: "", why: "belirsiz" };
+  };
+}
+const PRIMARY = makePrimary(LOCDICT);
+const normC = s => trLower(s).replace(/[^a-zçğıöşüâîû]/g,"");
 function prepare(rows){
   return rows.map((r, idx) => {
     const company = clean(r.company_candidates), maps = clean(r.maps_best_guess);
     const d = parseDate(r.published);
     const content = clean(r.content) || clean(r.raw_text);
+    const cityAll = splitMulti(r.city_candidates);
+    const pc = PRIMARY({ cityAll, title: r.title, body: r.raw_text || r.content || "" }).city;
+    const own = pc && LOCDICT[pc] ? new Set(LOCDICT[pc].map(normC)) : null;
+    const distAll = splitMulti(r.district_candidates);
+    const district = own ? distAll.filter(x => own.has(normC(x))) : [];
+    const city = pc ? [pc] : [];
     return {
       _i: idx,
       published: clean(r.published),
@@ -441,13 +492,14 @@ function prepare(rows){
       title: clean(r.title),
       summary: clean(r.summary),
       content: content,
-      city: splitMulti(r.city_candidates),
-      district: splitMulti(r.district_candidates),
+      city: city,
+      cityOthers: cityAll.filter(c => c !== pc),
+      district: district,
       neighborhood: clean(r.neighborhood_candidates),
       firm: company ? company : maps,
       activity: clean(r.activity_candidates) || clean(r.activity_type) || clean(r.facility_candidates),
       link: safeUrl(r.link),
-      city_raw: clean(r.city_candidates), district_raw: clean(r.district_candidates),
+      city_raw: city.join(", "), district_raw: district.join(", "),
       _search: trLower([r.title, r.summary, content, company || maps, r.city_candidates, r.district_candidates].map(clean).join(" \u0001 "))
     };
   });
@@ -610,7 +662,7 @@ function renderTable(){
         </div>
       </button>
       ${op ? `<div class="tx">
-        <div class="kv">${kvc("Mahalle / Bölge", esc(x.neighborhood))}${kvc("Faaliyet", esc(x.activity))}</div>
+        <div class="kv">${kvc("Mahalle / Bölge", esc(x.neighborhood))}${kvc("Faaliyet", esc(x.activity))}${x.cityOthers.length ? kvc("Metinde geçen diğer iller", esc(x.cityOthers.join(", "))) : ""}</div>
         ${x.summary ? `<p>${esc(short(x.summary, 500))}</p>` : ""}
         <div class="row2">${x.link ? `<a class="btn" href="${esc(x.link)}" target="_blank" rel="noopener">Habere Git ↗</a>` : ""}</div>
       </div>` : ""}
